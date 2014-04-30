@@ -2,7 +2,6 @@
 
 import os
 import argparse
-import netaddr
 
 def print_list(celllist, details, args):
 	for cell in cells:
