@@ -29,15 +29,23 @@ def print_table(celllist, details, args, maxlen):
 			strlen = len(cell[details[i]])
 			if strlen % 8 == 0:
 				strlen += 1
-			tabs = ((maxlen[details[i]]//8 + 1)*8 - strlen)//8 + 1
+			tabs = ((maxlen[details[i]]//8 + 1)*8 - strlen)//8 + 1  #calculate the number of tabs for printing
 			print_string += "\t" * tabs
 		print_string += "\n"
 	print(print_string)
 
+def sorter(k):
+	tuple = ()
+
+	for i in args.sort_by:
+		tuple += (k[details[i]],)
+
+	return tuple
+
 parser = argparse.ArgumentParser(description="Frontend for iwlist scan")
 parser.add_argument("interface", help="Specify the interface (default: all)", metavar="iface", nargs='?', default='')
 parser.add_argument("-s", "--show", help="Which details to show (default: all) and in which order", choices=['a', 'c', 'e', 'f', 'l', 'q'], nargs='+', default=['a', 'e', 'f', 'q', 'c', 'l'], metavar="details")
-parser.add_argument("-b", "--sort-by", help="NOT YET IMPLEMENTED!! Sort by detail (default: none)", choices=['a', 'c', 'e', 'f', 'l', 'q']) #, nargs='+')
+parser.add_argument("-b", "--sort-by", help="Sort by detail (default: none)", choices=['a', 'c', 'e', 'f', 'l', 'q'], nargs='+')
 parser.add_argument("-f", "--find", help="Search for a detail", metavar=("detail", "search-string"), nargs=2)
 parser.add_argument("-o", "--omit", help="Omit descriptions", action="store_true", default=False)
 parser.add_argument("--output", help="Print output as list or table (default: list)", choices=['list', 'table'], default="list")
@@ -75,10 +83,10 @@ for line in lines:
 				continue
 		if len(temp["ESSID"]) > maxlen["ESSID"]:
 			maxlen["ESSID"] = len(temp["ESSID"])
-		if args.sort_by != None:
-			pass
-		else:
-			cells.append(temp)
+		cells.append(temp)
+
+if args.sort_by != None:
+	cells = sorted(cells, key=sorter)
 
 if len(cells) == 0:
 	print("No cells found!")
