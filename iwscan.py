@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 import os
+import subprocess
+import sys
 import argparse
+
 
 def print_list(celllist, details, args):
 	for cell in cells:
@@ -14,6 +17,7 @@ def print_list(celllist, details, args):
 			print(print_string + cell[details[i]])
 		print("")
 
+
 def print_table(celllist, details, args, maxlen):
 	print_string = ""
 	if not args.omit:
@@ -21,7 +25,7 @@ def print_table(celllist, details, args, maxlen):
 
 	for i in details.values():
 		if maxlen[i] % 8 == 0:
-			maxlen[i] += 1		
+			maxlen[i] += 1
 
 	for cell in cells:
 		for i in args.show:
@@ -29,10 +33,11 @@ def print_table(celllist, details, args, maxlen):
 			strlen = len(cell[details[i]])
 			if strlen % 8 == 0:
 				strlen += 1
-			tabs = ((maxlen[details[i]]//8 + 1)*8 - strlen)//8 + 1  #calculate the number of tabs for printing
+			tabs = ((maxlen[details[i]] // 8 + 1) * 8 - strlen) // 8 + 1  # calculate the number of tabs for printing
 			print_string += "\t" * tabs
 		print_string += "\n"
 	print(print_string)
+
 
 def sorter(k):
 	tuple = ()
@@ -53,10 +58,24 @@ parser.add_argument("--file", help="Interpret iface as file-input", action="stor
 args = parser.parse_args()
 
 if not args.file:
-	stream = os.popen("iwlist " + args.interface + " scan")
+	cmd = ['iwlist']
+	if args.interface:
+		cmd.append(args.interface)
+	cmd.append('scan')
 else:
-	stream = os.popen("cat " + args.interface)
-lines = stream.readlines()
+	cmd = ['cat', args.interface]
+try:
+	stream = subprocess.check_output(cmd, universal_newlines=True)
+except subprocess.CalledProcessError as e:
+	print("An error occured while calling %s" % (str(' ').join(cmd)))
+	if e.output:
+		print(e.output)
+	sys.exit(e.returncode)
+except Exception as e:
+	print("An error occured while calling %s" % (str(' ').join(cmd)))
+	print(e)
+	sys.exit(1)
+lines = stream.splitlines()
 cells = list()
 details = dict(a="Address", c="Channel", e="ESSID", f="Frequency", l="Level", q="Quality")
 maxlen = dict(Address=17, Channel=3, ESSID=0, Frequency=9, Level=3, Quality=2)
@@ -78,14 +97,14 @@ for line in lines:
 		temp["Level"] = quallvl[2].split("=")[-1]
 	elif line.find("ESSID") != -1:
 		temp["ESSID"] = line.split(":")[-1].rstrip().strip("\"")
-		if args.find != None:
+		if args.find:
 			if temp[details[args.find[0]]].find(args.find[1]) == -1:
 				continue
 		if len(temp["ESSID"]) > maxlen["ESSID"]:
 			maxlen["ESSID"] = len(temp["ESSID"])
 		cells.append(temp)
 
-if args.sort_by != None:
+if args.sort_by:
 	cells = sorted(cells, key=sorter)
 
 if len(cells) == 0:
