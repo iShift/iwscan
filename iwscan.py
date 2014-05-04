@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import os
+import subprocess
+import sys
 import argparse
 
 def print_list(celllist, details, args):
@@ -53,10 +55,24 @@ parser.add_argument("--file", help="Interpret iface as file-input", action="stor
 args = parser.parse_args()
 
 if not args.file:
-	stream = os.popen("iwlist " + args.interface + " scan")
+	cmd = ['iwlist']
+	if args.interface:
+		cmd.append(args.interface)
+	cmd.append('scan')
 else:
-	stream = os.popen("cat " + args.interface)
-lines = stream.readlines()
+	cmd = ['cat', args.interface]
+try:
+	stream = subprocess.check_output(cmd, universal_newlines=True)
+except subprocess.CalledProcessError as e:
+	print("An error occured while calling %s" % (str(' ').join(cmd)))
+	if e.output:
+		print(e.output)
+	sys.exit(e.returncode)
+except Exception as e:
+	print("An error occured while calling %s" % (str(' ').join(cmd)))
+	print(e)
+	sys.exit(1)
+lines = stream.splitlines()
 cells = list()
 details = dict(a="Address", c="Channel", e="ESSID", f="Frequency", l="Level", q="Quality")
 maxlen = dict(Address=17, Channel=3, ESSID=0, Frequency=9, Level=3, Quality=2)
