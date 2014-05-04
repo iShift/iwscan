@@ -5,6 +5,7 @@ import subprocess
 import sys
 import argparse
 
+
 def print_list(celllist, details, args):
 	for cell in cells:
 		for i in args.show:
@@ -16,6 +17,7 @@ def print_list(celllist, details, args):
 			print(print_string + cell[details[i]])
 		print("")
 
+
 def print_table(celllist, details, args, maxlen):
 	print_string = ""
 	if not args.omit:
@@ -23,7 +25,7 @@ def print_table(celllist, details, args, maxlen):
 
 	for i in details.values():
 		if maxlen[i] % 8 == 0:
-			maxlen[i] += 1		
+			maxlen[i] += 1
 
 	for cell in cells:
 		for i in args.show:
@@ -31,10 +33,11 @@ def print_table(celllist, details, args, maxlen):
 			strlen = len(cell[details[i]])
 			if strlen % 8 == 0:
 				strlen += 1
-			tabs = ((maxlen[details[i]]//8 + 1)*8 - strlen)//8 + 1  #calculate the number of tabs for printing
+			tabs = ((maxlen[details[i]] // 8 + 1) * 8 - strlen) // 8 + 1  # calculate the number of tabs for printing
 			print_string += "\t" * tabs
 		print_string += "\n"
 	print(print_string)
+
 
 def sorter(k):
 	tuple = ()
@@ -94,14 +97,14 @@ for line in lines:
 		temp["Level"] = quallvl[2].split("=")[-1]
 	elif line.find("ESSID") != -1:
 		temp["ESSID"] = line.split(":")[-1].rstrip().strip("\"")
-		if args.find != None:
+		if args.find:
 			if temp[details[args.find[0]]].find(args.find[1]) == -1:
 				continue
 		if len(temp["ESSID"]) > maxlen["ESSID"]:
 			maxlen["ESSID"] = len(temp["ESSID"])
 		cells.append(temp)
 
-if args.sort_by != None:
+if args.sort_by:
 	cells = sorted(cells, key=sorter)
 
 if len(cells) == 0:
