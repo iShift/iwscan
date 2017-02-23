@@ -37,7 +37,10 @@ def print_table(celllist, details, args, maxlen):
 			print_string += "\t" * tabs
 		print_string += "\n"
 	print(print_string)
-
+	
+def print_ssid(celllist, details, args):
+	for cell in cells:
+		print('<option>'+cell[details['e']]+'</option>')
 
 def sorter(k):
 	tuple = ()
@@ -53,7 +56,7 @@ parser.add_argument("-s", "--show", help="Which details to show (default: all) a
 parser.add_argument("-b", "--sort-by", help="Sort by detail (default: none)", choices=['a', 'c', 'e', 'f', 'l', 'q'], nargs='+')
 parser.add_argument("-f", "--find", help="Search for a detail", metavar=("detail", "search-string"), nargs=2)
 parser.add_argument("-o", "--omit", help="Omit descriptions", action="store_true", default=False)
-parser.add_argument("--output", help="Print output as list or table (default: list)", choices=['list', 'table'], default="list")
+parser.add_argument("--output", help="Print output as list, table or ssid (ssid for ssid only for html option) (default: list)", choices=['list', 'table','ssid'], default="list")
 parser.add_argument("--file", help="Interpret iface as file-input", action="store_true", default=False)
 args = parser.parse_args()
 
@@ -114,3 +117,5 @@ else:
 		print_list(cells, details, args)
 	elif args.output == "table":
 		print_table(cells, details, args, maxlen)
+	elif args.output == "ssid":
+		print_ssid(cells, details, args)
